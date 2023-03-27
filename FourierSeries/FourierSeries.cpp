@@ -47,20 +47,22 @@ complex<double> IDFT(std::vector<std::complex<double>> x, unsigned int N, double
 void Test()
 {
     std::vector<std::complex<double>> x = {
+        {1, 0},
         {2, 0},
-        {4, 0},
-        {8, 0},
-        {16, 0}
+        {3, 0},
+        {4, 0}
     };
     std::vector<std::complex<double>> res = {
-        {30, 0},
-        {-6, 12},
-        {-10, 0},
-        {-6, -12}
+        {0, 0},
+        {0, 0},
+        {0, 0},
+        {0, 0}
     };
     for (int i = 0; i < 4; i++)
     {
-        std::cout << DFT(x, 4, i) << std::endl;
+        complex<double> current_point = DFT(x, 4, i);
+        res[i] = current_point;
+        std::cout << current_point << std::endl;
     }
     std::cout << std::endl;
     for (int i = 0; i < 4; i++)
