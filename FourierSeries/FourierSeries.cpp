@@ -3,6 +3,7 @@
 #include <iostream>
 #include <complex>
 #include <vector>
+#include <random>
 
 using namespace std;
 
@@ -98,7 +99,7 @@ void Task4()
     {
         x[i] = 0.01 * i;
         y[i] = X_1(x[i]);
-        complexX[i] = { x[i],0 };
+        complexX[i] = { y[i],0 };
         std::cout << x[i] << " " << complexX[i] << std::endl;
     }
     std::cout << std::endl;
@@ -114,11 +115,53 @@ void Task4()
     {
         std::cout << x[i] << " " << IDFT(complexY, n, i) << std::endl;
     }
+    std::cout << std::endl;
+}
 
+std::default_random_engine generator;
+std::normal_distribution<double> distribution(0.0, 1.0);
+
+double X_2(double x)
+{
+    double x1 = X_1(x);
+    double res = x1 + distribution(generator);
+    return res;
+}
+
+void Task5() {
+    std::cout << "Task 5" << std::endl;
+    unsigned int n = 100;
+    std::vector<double> x(n);
+    double* y = new double[n];
+    std::vector<std::complex<double>> complexX(n);
+    std::vector<std::complex<double>> complexY(n);
+    std::cout << "input" << std::endl;
+    for (int i = 0; i < n; i++)
+    {
+        x[i] = 0.01 * i;
+        y[i] = X_2(x[i]);
+        complexX[i] = { y[i],0 };
+        std::cout << x[i] << " " << complexX[i] << std::endl;
+    }
+    std::cout << std::endl;
+    std::cout << "after DFT" << std::endl;
+    for (int i = 0; i < n; i++)
+    {
+        complexY[i] = DFT(complexX, n, i);
+        std::cout << x[i] << " " << complexY[i] << std::endl;
+    }
+    std::cout << std::endl;
+    std::cout << "after IDFT" << std::endl;
+    for (int i = 0; i < n; i++)
+    {
+        std::cout << x[i] << " " << IDFT(complexY, n, i) << std::endl;
+    }
+    std::cout << std::endl;
 }
 
 int main()
 {
     Test();
     Task4();
+    Task5();
 }
