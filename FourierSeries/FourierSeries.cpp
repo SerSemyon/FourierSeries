@@ -58,6 +58,13 @@ void Test()
         {0, 0},
         {0, 0}
     };
+    std::cout << "input" << std::endl;
+    for (int i = 0; i < 4; i++)
+    {
+        std::cout << x[i] << std::endl;
+    }
+    std::cout << std::endl;
+    std::cout << "after DFT" << std::endl;
     for (int i = 0; i < 4; i++)
     {
         complex<double> current_point = DFT(x, 4, i);
@@ -65,13 +72,53 @@ void Test()
         std::cout << current_point << std::endl;
     }
     std::cout << std::endl;
+    std::cout << "after IDFT" << std::endl;
     for (int i = 0; i < 4; i++)
     {
         std::cout << IDFT(res, 4, i) << std::endl;
     }
+    std::cout << std::endl;
+}
+
+double X_1(double n)
+{
+    return sin(2 * n) + sin(3 * n) + sin(5 * n);
+}
+
+void Task4() 
+{
+    std::cout << "Task 4" << std::endl;
+    unsigned int n = 100;
+    std::vector<double> x(n);
+    double* y = new double[n];
+    std::vector<std::complex<double>> complexX(n);
+    std::vector<std::complex<double>> complexY(n);
+    std::cout << "input" << std::endl;
+    for (int i = 0; i < n; i++)
+    {
+        x[i] = 0.01 * i;
+        y[i] = X_1(x[i]);
+        complexX[i] = { x[i],0 };
+        std::cout << x[i] << " " << complexX[i] << std::endl;
+    }
+    std::cout << std::endl;
+    std::cout << "after DFT" << std::endl;
+    for (int i = 0; i < n; i++)
+    {
+        complexY[i] = DFT(complexX, n, i);
+        std::cout << x[i] << " " << complexY[i] << std::endl;
+    }
+    std::cout << std::endl;
+    std::cout << "after IDFT" << std::endl;
+    for (int i = 0; i < n; i++)
+    {
+        std::cout << x[i] << " " << IDFT(complexY, n, i) << std::endl;
+    }
+
 }
 
 int main()
 {
     Test();
+    Task4();
 }
