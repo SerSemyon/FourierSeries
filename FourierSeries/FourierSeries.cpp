@@ -171,22 +171,52 @@ complex<double> FFT(std::vector<std::complex<double>> x, unsigned int N, double 
         {
             W_Nnk *= W_N;
         }
-        X_1 += x[2*m] * W_Nnk;
-        X_2 += x[2 * m+1] * W_Nnk;
+        X_1 += x[2 * m] * W_Nnk;
+        X_2 += x[2 * m + 1] * W_Nnk;
     }
     complex<double> W_Nk = 1;
-    for (int i = 0; i < N / 2; i++)
+    for (int i = 0; i < k; i++)
     {
         W_Nk *= W_N;
     }
-    if (k <= N / 2)
-        return X_1 + X_2 * W_Nk;
-    return X_1 - X_2 * W_Nk;
+    return X_1 + X_2 * W_Nk;
+}
+
+void Task1() {
+    std::cout << "Task 1" << std::endl;
+    unsigned int n = 8;
+    std::vector<double> x(n);
+    double* y = new double[n];
+    std::vector<std::complex<double>> complexX(n);
+    std::vector<std::complex<double>> complexY(n);
+    std::cout << "input" << std::endl;
+    for (int i = 0; i < n; i++)
+    {
+        x[i] = 0.01 * i;
+        y[i] = X_2(x[i]);
+        complexX[i] = { y[i],0 };
+        std::cout << x[i] << " " << complexX[i] << std::endl;
+    }
+    std::cout << std::endl;
+    std::cout << "after DFT" << std::endl;
+    for (int i = 0; i < n; i++)
+    {
+        complexY[i] = FFT(complexX, n, i);
+        std::cout << x[i] << " " << complexY[i] << std::endl;
+    }
+    std::cout << std::endl;
+    std::cout << "after IDFT" << std::endl;
+    for (int i = 0; i < n; i++)
+    {
+        std::cout << x[i] << " " << IDFT(complexY, n, i) << std::endl;
+    }
+    std::cout << std::endl;
 }
 
 int main()
 {
-    Test();
-    Task4();
-    Task5();
+    //Test();
+    //Task4();
+    //Task5();
+    Task1();
 }
