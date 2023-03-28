@@ -159,6 +159,31 @@ void Task5() {
     std::cout << std::endl;
 }
 
+complex<double> FFT(std::vector<std::complex<double>> x, unsigned int N, double k)
+{
+    complex<double> W_N = E_ix(2 * M_PI / N);
+    complex<double> X_1 = 0;
+    complex<double> X_2 = 0;
+    for (int m = 0; m < N / 2; m++)
+    {
+        complex<double> W_Nnk = 1;
+        for (int i = 0; i < 2 * m * k; i++)
+        {
+            W_Nnk *= W_N;
+        }
+        X_1 += x[2*m] * W_Nnk;
+        X_2 += x[2 * m+1] * W_Nnk;
+    }
+    complex<double> W_Nk = 1;
+    for (int i = 0; i < N / 2; i++)
+    {
+        W_Nk *= W_N;
+    }
+    if (k <= N / 2)
+        return X_1 + X_2 * W_Nk;
+    return X_1 - X_2 * W_Nk;
+}
+
 int main()
 {
     Test();
