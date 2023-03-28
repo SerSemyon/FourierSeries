@@ -210,7 +210,7 @@ complex<double> IFFT(std::vector<std::complex<double>> x, unsigned int N, double
 
 void Task1() {
     std::cout << "Task 1" << std::endl;
-    unsigned int n = 10;
+    unsigned int n = 100;
     std::vector<double> x(n);
     double* y = new double[n];
     std::vector<std::complex<double>> complexX(n);
@@ -248,11 +248,93 @@ unsigned int FindExecutionTime(void method())
     return search_time;
 }
 
+void Normalize(std::vector<int>& x) {
+    int carry = 0;
+    for (int i = x.size() - 1; i >= 0; --i) {
+        x[i] += carry;
+        carry = x[i] / 10;
+        x[i] %= 10;
+    }
+}
+
+std::vector<int> Multiply(const std::vector<int>& a, const std::vector<int>& b) {
+    std::vector < std::complex < double>> fa(a.rbegin(), a.rend()), fb(b.rbegin(), b.rend());
+    size_t n = 1;
+    for (; n <= std::max(a.size(), b.size()); n <<= 1) {}
+    n <<= 1;
+
+    fa.resize(n), fb.resize(n);
+
+    std::vector<std::complex<double>> resA = fa;
+    std::vector<std::complex<double>> resB = fb;
+
+    for (int i = 0; i < n; i++)
+    {
+        resA[i] = FFT(fa, n, i);
+        resB[i] = FFT(fb, n, i);
+
+    }
+    for (size_t i = 0; i < n; ++i) {
+        resA[i] *= resB[i];
+    }
+    std::vector<std::complex<double>> out = resA;
+    for (int i = 0; i < n; i++)
+    {
+        out[i] = IFFT(resA, n, i);
+    }
+
+    std::vector<int> result(n);
+    for (size_t i = 0; i < n; ++i) {
+        result[i] = std::round(out[i].real());
+    }
+
+    Normalize(result);
+    std::reverse(result.begin(), result.end());
+    size_t shift = 0;
+    for (size_t i = 0; i < result.size(); ++i) {
+        bool is_null = result[i] == 0;
+        shift += (is_null) ? 1 : 0;
+        if (!is_null) {
+            break;
+        }
+    }
+    result = { result.begin() + shift, result.end() };
+    return result;
+}
+
+void MultipleBigInteger()
+{
+    std::cout << "Multiply big integer" << std::endl;
+    unsigned int a_size = 4;
+    std::vector<int> a(a_size);
+    for (int i = 0; i < a_size; i++)
+    {
+        a[i] = rand()%10;
+        std::cout << a[i];
+    }
+    std::cout << std::endl;
+    unsigned int b_size = 4;
+    std::vector<int> b(b_size);
+    for (int i = 0; i < b_size; i++)
+    {
+        b[i] = rand() % 10;
+        std::cout << b[i];
+    }
+    std::cout << std::endl;
+    auto result = Multiply(a, b);
+    for (int i = 0; i < result.size(); i++)
+    {
+        std::cout << result[i];
+    }
+    std::cout << std::endl;
+}
+
 int main()
 {
-    //Test();
+    Test();
     //Task4();
-    //Task5();
+    ////Task5();
     //std::cout << FindExecutionTime(Task5) << std::endl;
-    std::cout << FindExecutionTime(Task1) << std::endl;
+    //std::cout << FindExecutionTime(Task1) << std::endl;
+    MultipleBigInteger();
 }
