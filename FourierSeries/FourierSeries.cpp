@@ -4,6 +4,7 @@
 #include <complex>
 #include <vector>
 #include <random>
+#include <ctime>
 
 using namespace std;
 
@@ -182,9 +183,34 @@ complex<double> FFT(std::vector<std::complex<double>> x, unsigned int N, double 
     return X_1 + X_2 * W_Nk;
 }
 
+complex<double> IFFT(std::vector<std::complex<double>> x, unsigned int N, double k)
+{
+    complex<double> W_N = E_ix(2 * M_PI / N);
+    complex<double> X_1 = 0;
+    complex<double> X_2 = 0;
+    for (int m = 0; m < N / 2; m++)
+    {
+        complex<double> W_Nnk = 1;
+        for (int i = 0; i < 2 * m * k; i++)
+        {
+            W_Nnk /= W_N;
+        }
+        X_1 += x[2 * m] * W_Nnk;
+        X_2 += x[2 * m + 1] * W_Nnk;
+    }
+    X_1/=N;
+    X_2/=N;
+    complex<double> W_Nk = 1;
+    for (int i = 0; i < k; i++)
+    {
+        W_Nk /= W_N;
+    }
+    return X_1 + X_2 * W_Nk;
+}
+
 void Task1() {
     std::cout << "Task 1" << std::endl;
-    unsigned int n = 8;
+    unsigned int n = 10;
     std::vector<double> x(n);
     double* y = new double[n];
     std::vector<std::complex<double>> complexX(n);
@@ -208,9 +234,18 @@ void Task1() {
     std::cout << "after IDFT" << std::endl;
     for (int i = 0; i < n; i++)
     {
-        std::cout << x[i] << " " << IDFT(complexY, n, i) << std::endl;
+        std::cout << x[i] << IFFT(complexY, n, i) << std::endl;
     }
     std::cout << std::endl;
+}
+
+unsigned int FindExecutionTime(void method())
+{
+    unsigned int start_time = clock(); // начальное время
+    method();
+    unsigned int end_time = clock(); // конечное время
+    unsigned int search_time = end_time - start_time;
+    return search_time;
 }
 
 int main()
@@ -218,5 +253,6 @@ int main()
     //Test();
     //Task4();
     //Task5();
-    Task1();
+    //std::cout << FindExecutionTime(Task5) << std::endl;
+    std::cout << FindExecutionTime(Task1) << std::endl;
 }
