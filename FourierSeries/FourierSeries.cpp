@@ -120,7 +120,7 @@ void Task4()
 }
 
 std::default_random_engine generator;
-std::normal_distribution<double> distribution(0.0, 1.0);
+std::normal_distribution<double> distribution(0.0, 0.5);
 
 double X_2(double x)
 {
@@ -349,81 +349,117 @@ std::vector<T> sincFilter(std::vector<T> x, double omega)
     return y;
 }
 
-//template<typename T>
-//double thetaBessel(T x, int n)
-//{
-//    unsigned int factNpK = 1;
-//    unsigned int factNmK = 1;
-//    unsigned int factK = 1;
-//    for (int i = 0; i < n; i++)
-//        factNpK *= i;
-//    factNmK = factNpK;
-//    T sum = pow(x, n);
-//    for (int k = 1; k < n; k++)
-//    {
-//        factK *= k;
-//        factNpK *= (n + k);
-//        factNmK *= (n - k);
-//        sum += pow(x, n - k) * factNpk / (factNmK * factK * pow(2, k));
-//    }
-//}
-
-//template<typename T>
-//std::vector<T> BesselFilter(T x, double omega, double omega0)
-//{
-//    thetaBessel(x,)
-//}
-
 template<typename T>
-void firstCriteria(std::vector<T> X, T noiseAmplitude)
-{
-    T maxXk = 0;
-    for (int k = 0; k < X.size; k++) 
-    {
-        T absXk = abs(X[k]);
-        if (absXk > maxXk)
-            maxXk = absXk;
+std::vector<T> firstCriteria(const std::vector<T>& X, double noiseAmplitude) {
+    std::vector<T> out(X.begin(), X.end());
+    std::vector<double> amplitude(X.size());
+    double maxXk = 0;
+    for (size_t k = 0; k < out.size(); k++) {
+        amplitude[k] = abs(X[k]);
+        //double absXk = abs(out[k]);
+        if (amplitude[k] > maxXk)
+            maxXk = amplitude[k];
     }
-    T epsilon = noiseAmplitude / maxXk + 0.0001;
-    for (int k = 0; k < X.size; k++)
-    {
-        if (abs(X[k]) / maxXk <= epsilon)
-            X[k] = 0;
+    double epsilon = noiseAmplitude / maxXk + 0.1;
+    for (size_t k = 0; k < out.size(); k++) {
+        if (amplitude[k] / maxXk <= epsilon)
+            out[k] = 0;
     }
+    return out;
 }
 
 template<typename T>
-void secondCriteria(std::vector<T> X)
+std::vector<T> secondCriteria(const std::vector<T>& X) {
+    std::vector<T> out(X.begin(), X.end());
+    std::vector<double> amplitude(X.size());
+    double maxXk = pow(abs(out[0]), 2);
+    double minXk = maxXk;
+    double sum = 0;
+    for (size_t k = 0; k < out.size(); k++) {
+        amplitude[k] = pow(abs(out[k]), 2);
+        if (amplitude[k] > maxXk)
+            maxXk = amplitude[k];
+        if (amplitude[k] < minXk)
+            minXk = amplitude[k];
+        sum += amplitude[k];
+    }
+    sum /= out.size();
+    double epsilon = minXk / sum + 0.1;
+    for (size_t k = 0; k < out.size(); k++) {
+        if (amplitude[k] / maxXk <= epsilon)
+            out[k] = 0;
+    }
+    return out;
+}
+
+void FiltrTask1() 
 {
-    T minXk = X[0]*X[0];
-    T maxXk = X[0]*X[0];
-    T sum = 0;
-    for (int k = 0; k < X.size; k++)
+    std::cout << "First criteria" << std::endl;
+    unsigned int n = 100;
+    std::vector<double> x(n);
+    double* y = new double[n];
+    std::vector<std::complex<double>> complexX(n);
+    std::vector<std::complex<double>> complexY(n);
+    std::cout << "x = [" << std::endl;
+    for (int i = 0; i < n; i++)
     {
-        T absXk = abs(X[k])*abs(X[k]);
-        if (absXk > maxXk)
-            maxXk = absXk;
-        if (absXk < minXk)
-            minXk = absXk;
-        sum += absXk;
+        x[i] = 0.01 * i;
+        y[i] = X_2(x[i]);
+        complexX[i] = { y[i],0 };
+        std::cout << y[i] << ",";
     }
-    sum /= X.size;
-    T epsilon = minXk / sum;
-    for (int k = 0; k < X.size; k++)
+    std::cout << "];" << std::endl;
+    for (int i = 0; i < n; i++)
     {
-        if (abs(X[k]) / maxXk <= epsilon)
-            X[k] = 0;
+        complexY[i] = FFT(complexX, n, i);
     }
+    std::cout << std::endl;
+    complexY = firstCriteria<std::complex<double>>(complexY, 1.5);
+    std::cout << "y = [";
+    for (int i = 0; i < n; i++)
+    {
+        std::cout << IFFT(complexY, n, i).real() << ",";
+    }
+    std::cout << "];" << std::endl;
+}
+
+void FiltrTask2()
+{
+    std::cout << "Second criteria" << std::endl;
+    unsigned int n = 100;
+    std::vector<double> x(n);
+    double* y = new double[n];
+    std::vector<std::complex<double>> complexX(n);
+    std::vector<std::complex<double>> complexY(n);
+    std::cout << "x = [" << std::endl;
+    for (int i = 0; i < n; i++)
+    {
+        x[i] = 0.03 * i;
+        y[i] = X_2(x[i]);
+        complexX[i] = { y[i],0 };
+        std::cout << y[i] << ",";
+    }
+    std::cout << "];" << std::endl;
+    for (int i = 0; i < n; i++)
+    {
+        complexY[i] = FFT(complexX, n, i);
+    }
+    std::cout << std::endl;
+    complexY = secondCriteria<std::complex<double>>(complexY);
+    std::cout << "y = [";
+    for (int i = 0; i < n; i++)
+    {
+        std::cout << IFFT(complexY, n, i).real() << ",";
+    }
+    std::cout << "];" << std::endl;
 }
 
 int main()
 {
+
     //Test();
     //Task4();
     ////Task5();
-    //std::cout << FindExecutionTime(Task5) << std::endl;
-    //std::cout << FindExecutionTime(Task1) << std::endl;
-    //MultipleBigInteger();
-    std::vector<double> X(10);
+    FiltrTask2();
 
 }
