@@ -329,26 +329,6 @@ void MultipleBigInteger()
     std::cout << std::endl;
 }
 
-double hCore(double omega, double t)
-{
-    return sin(omega * M_PI * t) / (M_PI * t);
-}
-
-template<typename T>
-std::vector<T> sincFilter(std::vector<T> x, double omega)
-{
-    std::vector<T> y = new vector<T>(x.size);
-    for (int n = 0; n < x.size; n++)
-    {
-        y[n] = 0;
-        for (int k = 0; k < n; k++)
-        {
-            y[n] += hCore(omega, k) * x[n - k];
-        }
-    }
-    return y;
-}
-
 template<typename T>
 std::vector<T> firstCriteria(const std::vector<T>& X, double noiseAmplitude) {
     std::vector<T> out(X.begin(), X.end());
@@ -454,12 +434,127 @@ void FiltrTask2()
     std::cout << "];" << std::endl;
 }
 
+double hCore(double f0, double t)
+{
+    return sin(2* M_PI * f0 * t) / (M_PI * t);
+}
+
+template<typename T>
+std::vector<T> sincFilter(const std::vector<T>& X, double omega)
+{
+    std::vector<T> out(X.begin(), X.end());
+    for (int n = 0; n < X.size(); n++)
+    {
+        out[n] = 0;
+        for (int k = 1; k < n; k++)
+        {
+            out[n] += hCore(omega, k) * X[n - k];
+        }
+    }
+    return out;
+}
+
+void FiltrTask3()
+{
+    std::cout << "Sinc filtr" << std::endl;
+    unsigned int n = 100;
+    std::vector<double> x(n);
+    double* y = new double[n];
+    std::vector<std::complex<double>> complexX(n);
+    std::vector<std::complex<double>> complexY(n);
+    std::cout << "x = [" << std::endl;
+    for (int i = 0; i < n; i++)
+    {
+        x[i] = 0.03 * i+0.1;
+        y[i] = X_1(x[i]);
+        complexX[i] = { y[i],0 };
+        std::cout << y[i] << ",";
+    }
+    std::cout << "];" << std::endl;
+    for (int i = 0; i < n; i++)
+    {
+        complexY[i] = FFT(complexX, n, i);
+    }
+    std::cout << std::endl;
+    complexY = sincFilter<std::complex<double>>(complexX, 10);
+    std::cout << "y = [";
+    for (int i = 0; i < n; i++)
+    {
+        //std::cout << IFFT(complexY, n, i).real() << ",";
+        std::cout << complexY[i].real() << ",";
+    }
+    std::cout << "];" << std::endl;
+}
+
+double thetaBessel(double x, int n)
+{
+    unsigned int factNpK = 1;
+    unsigned int factNmK = 1;
+    unsigned int factK = 1;
+    for (int i = 0; i < n; i++)
+        factNpK *= i;
+    factNmK = factNpK;
+    double sum = pow(x, n);
+    for (int k = 1; k < n; k++)
+    {
+        factK *= k;
+        factNpK *= (n + k);
+        factNmK *= (n - k);
+        sum += pow(x, n - k) * factNpK / (factNmK * factK * pow(2, k));
+    }
+    return sum;
+}
+
+template<typename T>
+std::vector<T> BesselFilter(std::vector<T>& X, double omega0)
+{
+    std::vector<T> out(X.begin(), X.end());
+    int n = 4;
+    for (size_t k = 0; k < out.size(); k++) {
+        out[k] = X[k] * thetaBessel(0, n) / thetaBessel(abs(X[k]) / omega0, n);
+    }
+    return out;
+}
+
+void FiltrTask4()
+{
+    std::cout << "First criteria" << std::endl;
+    unsigned int n = 100;
+    std::vector<double> x(n);
+    double* y = new double[n];
+    std::vector<std::complex<double>> complexX(n);
+    std::vector<std::complex<double>> complexY(n);
+    std::cout << "x = [" << std::endl;
+    for (int i = 0; i < n; i++)
+    {
+        x[i] = 0.01 * i;
+        y[i] = X_2(x[i]);
+        complexX[i] = { y[i],0 };
+        std::cout << y[i] << ",";
+    }
+    std::cout << "];" << std::endl;
+    for (int i = 0; i < n; i++)
+    {
+        //complexY[i] = FFT(complexX, n, i);
+    }
+    std::cout << std::endl;
+    complexY = BesselFilter<std::complex<double>>(complexX, 10);
+    std::cout << "y = [";
+    for (int i = 0; i < n; i++)
+    {
+        std::cout << IFFT(complexY, n, i).real() << ",";
+    }
+    std::cout << "];" << std::endl;
+}
+
 int main()
 {
 
     //Test();
     //Task4();
     ////Task5();
+    FiltrTask1();
     FiltrTask2();
-
+    FiltrTask3();
+    FiltrTask4();
 }
