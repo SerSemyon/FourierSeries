@@ -329,12 +329,47 @@ void MultipleBigInteger()
     std::cout << std::endl;
 }
 
+double hCore(double omega, double t)
+{
+    return sin(omega * M_PI * t) / (M_PI * t);
+}
+
+template<typename T>
+std::vector<T> sincFilter(std::vector<T> x, double omega)
+{
+    std::vector<T> y = new vector<T>(x.size);
+    for (int n = 0; n < x.size; n++)
+    {
+        y[n] = 0;
+        for (int k = 0; k < n; k++)
+        {
+            y[n] += hCore(omega, k) * x[n - k];
+        }
+    }
+    return y;
+}
+
+template<typename T>
+double thetaBessel(T x, int n)
+{
+    double p = 1;
+    for (int k = 0; k < n; k++)
+    {
+    }
+}
+
+template<typename T>
+std::vector<T> BesselFilter(std::vector<T> x, double omega)
+{
+
+}
+
 int main()
 {
-    Test();
+    //Test();
     //Task4();
     ////Task5();
     //std::cout << FindExecutionTime(Task5) << std::endl;
     //std::cout << FindExecutionTime(Task1) << std::endl;
-    MultipleBigInteger();
+    //MultipleBigInteger();
 }
