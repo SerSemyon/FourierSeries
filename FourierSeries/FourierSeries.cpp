@@ -349,19 +349,71 @@ std::vector<T> sincFilter(std::vector<T> x, double omega)
     return y;
 }
 
+//template<typename T>
+//double thetaBessel(T x, int n)
+//{
+//    unsigned int factNpK = 1;
+//    unsigned int factNmK = 1;
+//    unsigned int factK = 1;
+//    for (int i = 0; i < n; i++)
+//        factNpK *= i;
+//    factNmK = factNpK;
+//    T sum = pow(x, n);
+//    for (int k = 1; k < n; k++)
+//    {
+//        factK *= k;
+//        factNpK *= (n + k);
+//        factNmK *= (n - k);
+//        sum += pow(x, n - k) * factNpk / (factNmK * factK * pow(2, k));
+//    }
+//}
+
+//template<typename T>
+//std::vector<T> BesselFilter(T x, double omega, double omega0)
+//{
+//    thetaBessel(x,)
+//}
+
 template<typename T>
-double thetaBessel(T x, int n)
+void firstCriteria(std::vector<T> X, T noiseAmplitude)
 {
-    double p = 1;
-    for (int k = 0; k < n; k++)
+    T maxXk = 0;
+    for (int k = 0; k < X.size; k++) 
     {
+        T absXk = abs(X[k]);
+        if (absXk > maxXk)
+            maxXk = absXk;
+    }
+    T epsilon = noiseAmplitude / maxXk;
+    for (int k = 0; k < X.size; k++)
+    {
+        if (abs(X[k]) / maxXk <= epsilon)
+            X[k] = 0;
     }
 }
 
 template<typename T>
-std::vector<T> BesselFilter(std::vector<T> x, double omega)
+void secondCriteria(std::vector<T> X)
 {
-
+    T minXk = X[0]*X[0];
+    T maxXk = X[0]*X[0];
+    T sum = 0;
+    for (int k = 0; k < X.size; k++)
+    {
+        T absXk = abs(X[k])*abs(X[k]);
+        if (absXk > maxXk)
+            maxXk = absXk;
+        if (absXk < minXk)
+            minXk = absXk;
+        sum += absXk;
+    }
+    sum /= X.size;
+    T epsilon = minXk / sum;
+    for (int k = 0; k < X.size; k++)
+    {
+        if (abs(X[k]) / maxXk <= epsilon)
+            X[k] = 0;
+    }
 }
 
 int main()
@@ -372,4 +424,6 @@ int main()
     //std::cout << FindExecutionTime(Task5) << std::endl;
     //std::cout << FindExecutionTime(Task1) << std::endl;
     //MultipleBigInteger();
+    std::vector<double> X(10);
+
 }
