@@ -384,7 +384,7 @@ void firstCriteria(std::vector<T> X, T noiseAmplitude)
         if (absXk > maxXk)
             maxXk = absXk;
     }
-    T epsilon = noiseAmplitude / maxXk;
+    T epsilon = noiseAmplitude / maxXk + 0.0001;
     for (int k = 0; k < X.size; k++)
     {
         if (abs(X[k]) / maxXk <= epsilon)
